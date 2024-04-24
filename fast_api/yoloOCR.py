@@ -8,8 +8,8 @@ model_path = "model"
 general_model_name = "e50_aug.pt"
 image_model_name = "e100_img.pt"
 
-general_model = YOLO(os.path.join(model_path, general_model_name))
-image_model = YOLO(os.path.join(model_path, image_model_name))
+general_model = YOLO(os.path.join(model_path, general_model_name), device="gpu")
+image_model = YOLO(os.path.join(model_path, image_model_name), device="gpu")
 
 
 flags = {"hist": False, "bz": False}
@@ -65,8 +65,6 @@ def get_masks(img, model, img_model, flags, configs):
 def yoloTesseract(
     img, model=general_model, img_model=image_model, configs=configs, flags=flags
 ):
-
-    # img = cv2.imread(img_path)
     res = get_masks(img, general_model, image_model, flags, configs)
     if res["status"] == -1:
         for idx in configs.keys():
@@ -79,16 +77,5 @@ def yoloTesseract(
         text += image_to_string(
             img[cords[1] : cords[3], cords[0] : cords[2]], lang="mal+eng"
         )
-    # print(text)
+
     return text
-
-
-# output = evaluate(
-#     img_path="YOLOX/test.jpeg",
-#     model=general_model,
-#     img_model=image_model,
-#     configs=configs,
-#     flags=flags,
-# )
-
-# print(output)
