@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, UploadFile, status, Depends, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
 import aiofiles
 
 from yoloOCR import yoloTesseract
@@ -22,6 +23,8 @@ models.Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI()
+
+app.add_middleware(CORSMiddleware, allow_origins=["*"])
 
 
 # Dependency
