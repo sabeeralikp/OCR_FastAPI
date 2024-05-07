@@ -17,8 +17,11 @@ rec_model, rec_processor = (
 
 
 def suryaOCR(image):
+    torch.cuda.empty_cache()
     # image = Image.open("test.jpeg")
     predictions = run_ocr(
         [image], [langs], det_model, det_processor, rec_model, rec_processor
     )
-    return "\n".join([p.text for p in predictions[0].text_lines])
+    output = "\n".join([p.text for p in predictions[0].text_lines])
+    predictions = None
+    return output
