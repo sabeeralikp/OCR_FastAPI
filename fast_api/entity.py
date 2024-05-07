@@ -8,4 +8,5 @@ def extract_entity(text, entities):
     doc = nlp(text)
     for entity in doc.ents:
         entities[entity.label_].add(entity.text)
+    doc = None
     return entities

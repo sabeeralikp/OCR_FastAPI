@@ -120,8 +120,8 @@ async def ocr(
     return {
         "filename": file.filename,
         "docetID": docetID,
-        "yolo_text": "\n".join(doc_texts["yolo_text"]),
-        "surya_text": "\n".join(doc_texts["surya_text"]),
-        "exec_time": str(time.time() - start_time),
+        "ocr_text1": "\n".join(doc_texts["yolo_text"]),
+        "ocr_text2": "\n".join(doc_texts["surya_text"]),
+        # "exec_time": str(time.time() - start_time),
         "entities": doc_texts["entities"],
     }

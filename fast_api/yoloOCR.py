@@ -54,7 +54,9 @@ def get_masks(img, model, img_model, flags, configs):
     ans_masks = []
     img2 = img
 
-    res = get_predictions(model, img2, configs["paratext"])
+    res = get_predictions(
+        model, img2, {"sz": 640, "conf": 0.25, "rm": True, "classes": [0, 1]}
+    )
     if res["status"] == -1:
         response["status"] = -1
         return response
@@ -68,12 +70,13 @@ def yoloTesseract(
 
     # img = cv2.imread(img_path)
     res = get_masks(img, general_model, image_model, flags, configs)
-    if res["status"] == -1:
-        for idx in configs.keys():
-            configs[idx]["rm"] = False
-        return yoloTesseract(img, model, img_model, flags, configs)
+    # if res["status"] == -1:
+    #     for idx in configs.keys():
+    #         configs[idx]["rm"] = False
+    #     return yoloTesseract(img, model, img_model, flags, configs)
 
     sorted_arr = res["boxes1"][res["boxes1"][:, 1].argsort()]
+    res = None
     text = ""
     for cords in sorted_arr:
         text += image_to_string(
