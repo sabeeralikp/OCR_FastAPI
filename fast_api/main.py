@@ -17,7 +17,7 @@ from jsonpickle import encode
 from sqlalchemy.orm import Session
 import crud, models
 
-import chroma_utils
+from chroma_utils import ChromaUtils
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -25,6 +25,8 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 app.add_middleware(CORSMiddleware, allow_origins=["*"])
+
+chroma_utils = ChromaUtils()
 
 
 # Dependency
@@ -128,3 +130,8 @@ async def ocr(
         # "exec_time": str(time.time() - start_time),
         "entities": doc_texts["entities"],
     }
+
+
+@app.get("/search")
+def vector_search(query_str: str):
+    return chroma_utils.vector_search(query_str)
