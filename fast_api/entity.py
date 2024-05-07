@@ -1,7 +1,7 @@
 import spacy
 import spacy_transformers
 
-nlp = spacy.load("model-best")
+nlp = spacy.load("model-best-v2")
 
 
 def extract_entity(text, entities):
