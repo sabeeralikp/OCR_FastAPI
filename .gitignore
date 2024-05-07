@@ -2,5 +2,6 @@
 fast_api/data/
 fast_api/model/
 fast_api/model-best/
+fast_api/model-best-v2/
 fast_api/sql_app.db
 fast_api/__pycache__/

@@ -50,19 +50,24 @@ async def ocr(
     background_task: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
+
     doc_texts = {
         "yolo_text": [],
         "surya_text": [],
         "filename": "",
         "docetID": docetID,
         "entities": {
+            "DATE": set([]),
+            "DOC_ID": set([]),
             "FROM": set([]),
             "FROM_ADD": set([]),
+            "INDICATION": set([]),
+            "PERSONAL_NAME": set([]),
+            "PHONE": set([]),
+            "PLACE": set([]),
             "SUBJECT": set([]),
-            "DATE": set([]),
             "TO": set([]),
             "TO_ADD": set([]),
-            "PHONE_NUM": set([]),
         },
     }
     start_time = time.time()
