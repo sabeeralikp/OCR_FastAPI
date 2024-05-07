@@ -4,14 +4,14 @@ from surya.model.recognition.model import load_model
 from surya.model.recognition.processor import load_processor
 import torch
 
+torch.cuda.set_device(0)
+
 langs = ["ml", "en"]  # Replace with your languages
 
-det_processor, det_model = segformer.load_processor(), segformer.load_model(
-    device="cpu", dtype=torch.float32
-)
+det_processor, det_model = segformer.load_processor(), segformer.load_model()
 
 rec_model, rec_processor = (
-    load_model(device="cpu", dtype=torch.float32),
+    load_model(),
     load_processor(),
 )
 
