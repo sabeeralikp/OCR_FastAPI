@@ -55,6 +55,16 @@ class ChromaUtils:
                 for doc in docs
             ],
         )
+        self.vector_store_index.from_vector_store(
+            vector_store=self.vector_store,
+            storage_context=self.storage_context,
+            service_context=self.service_context,
+            show_progress=True,
+        )
+        self.query_retriver = self.vector_store_index.as_retriever(
+            service_context=self.service_context,
+            similarity_top_k=10,
+        )
 
     def vector_search(self, query_str: str):
         retrived_results = self.query_retriver.retrieve(query_str)
