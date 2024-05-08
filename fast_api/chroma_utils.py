@@ -1,7 +1,13 @@
 import chromadb
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.vector_stores.chroma import ChromaVectorStore
-from llama_index.core import Document, StorageContext, ServiceContext, VectorStoreIndex
+from llama_index.core import (
+    Document,
+    StorageContext,
+    ServiceContext,
+    VectorStoreIndex,
+    SimpleKeywordTableIndex,
+)
 
 
 class ChromaUtils:
@@ -24,10 +30,19 @@ class ChromaUtils:
             service_context=self.service_context,
             show_progress=True,
         )
+        self.keyword_index = SimpleKeywordTableIndex.from_documents(
+            documents=[],
+            storage_context=self.storage_context,
+            service_context=self.service_context,
+            show_progress=True,
+            kwargs={"vector_store_index": self.vector_store_index},
+        )
+
         self.query_retriver = self.vector_store_index.as_retriever(
             service_context=self.service_context,
             similarity_top_k=10,
         )
+        self.keyword_query_retriver = self.keyword_index.as_retriever()
 
     def add_collections(self, doc_data):
         docs = []
@@ -45,6 +60,7 @@ class ChromaUtils:
                 metadata_template="{key}=>{value}",
                 text_template="Metadata: {metadata_str}\n-----\nContent: {content}",
             )
+            self.keyword_index.insert(document=doc)
             docs.append(doc)
         self.chroma_collection.add(
             documents=[doc.text for doc in docs],
@@ -57,5 +73,6 @@ class ChromaUtils:
         )
 
     def vector_search(self, query_str: str):
-        retrived_results = self.query_retriver.retrieve(query_str)
+        retrived_results = self.keyword_query_retriver.retrieve(query_str)
+        retrived_results.extend(self.query_retriver.retrieve(query_str))
         return [rresult.node.metadata for rresult in retrived_results]
