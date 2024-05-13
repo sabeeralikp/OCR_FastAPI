@@ -10,7 +10,7 @@ class ChromaUtils:
         self.embed_model = HuggingFaceEmbedding(
             model_name="sentence-transformers/LaBSE", device="cpu"
         )
-        self.chroma_collection = self.db.get_or_create_collection("complaints")
+        self.chroma_collection = self.db.get_or_create_collection("complaints-prod")
         self.vector_store = ChromaVectorStore(self.chroma_collection)
         self.storage_context = StorageContext.from_defaults(
             vector_store=self.vector_store
