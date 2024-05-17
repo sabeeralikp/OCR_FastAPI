@@ -40,6 +40,7 @@ allowed_IPs = [
     "117.193.73.44",
     "117.193.73.44",
     "192.168.16.54",
+    "117.223.185.194",
 ]
 
 allowed_ports = [80, 443, 8080, 8000]
@@ -63,9 +64,10 @@ class IPRestrictionMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request, call_next):
 
-        remote_ip = request.headers.get("X-Forwarded-For")
+        remote_ip = request.headers.get("X-Forwarded-For").split(",")[0]
         warnings.warn(remote_ip)
         remote_port = request.url.port
+        warnings.warn(remote_port)
 
         if (
             not remote_ip
