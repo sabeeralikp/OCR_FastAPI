@@ -24,6 +24,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.status import HTTP_403_FORBIDDEN
+import warnings
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -63,7 +64,7 @@ class IPRestrictionMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
 
         remote_ip = remote_ip = request.headers.get("X-Forwarded-For")
-        print(request.headers.get("X-Forwarded-For"))
+        warnings.warn(request.headers.get("X-Forwarded-For"))
         remote_port = request.url.port
 
         if (
