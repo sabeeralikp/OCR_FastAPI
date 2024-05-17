@@ -19,24 +19,69 @@ import crud, models
 
 from chroma_utils import ChromaUtils
 
+from fastapi import FastAPI, HTTPException
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+from starlette.status import HTTP_403_FORBIDDEN
+
 models.Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI()
 
+chroma_utils = ChromaUtils()
+
+allowed_IPs = [
+    "117.193.73.30",
+    "117.193.73.30",
+    "app.cmo.kerala.gov.in",
+    "117.193.73.44",
+    "117.193.73.44",
+    "192.168.16.54",
+]
+
+allowed_ports = [80, 443, 8080]
+
+origins = [
+    "http://117.193.73.30",
+    "https://117.193.73.30",
+    "https://app.cmo.kerala.gov.in",
+    "http://117.193.73.44",
+    "https://117.193.73.44",
+    "http://192.168.16.54",
+]
+
+
+# Middleware to restrict access based on IP address and ports
+class IPRestrictionMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app, allowed_ips, allowed_ports):
+        super().__init__(app)
+        self.allowed_ips = allowed_ips
+        self.allowed_ports = allowed_ports
+
+    async def dispatch(self, request, call_next):
+        remote_ip = request.client.host
+        remote_port = request.url.port
+
+        if remote_ip not in self.allowed_ips or remote_port not in self.allowed_ports:
+            return JSONResponse(content="Access denied", status_code=HTTP_403_FORBIDDEN)
+
+        response = await call_next(request)
+        return response
+
+
+# Add the middleware to the app
+app.add_middleware(
+    IPRestrictionMiddleware, allowed_ips=allowed_IPs, allowed_ports=allowed_ports
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://117.193.73.30",
-        "https://117.193.73.30",
-        "https://app.cmo.kerala.gov.in",
-        "http://117.193.73.44",
-        "https://117.193.73.44",
-        "http://192.168.16.54",
-    ],
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
-
-chroma_utils = ChromaUtils()
 
 
 # Dependency
