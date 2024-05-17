@@ -41,7 +41,7 @@ allowed_IPs = [
     "192.168.16.54",
 ]
 
-allowed_ports = [80, 443, 8080]
+allowed_ports = [80, 443, 8080, 8000]
 
 origins = [
     "http://117.193.73.30",
@@ -61,11 +61,17 @@ class IPRestrictionMiddleware(BaseHTTPMiddleware):
         self.allowed_ports = allowed_ports
 
     async def dispatch(self, request, call_next):
-        remote_ip = request.client.host
-        remote_port = request.url.port
+        if request.client:
+            remote_ip = request.client.host
+            remote_port = request.url.port
 
-        if remote_ip not in self.allowed_ips or remote_port not in self.allowed_ports:
-            return JSONResponse(content="Access denied", status_code=HTTP_403_FORBIDDEN)
+            if (
+                remote_ip not in self.allowed_ips
+                or remote_port not in self.allowed_ports
+            ):
+                return JSONResponse(
+                    content="Access denied", status_code=HTTP_403_FORBIDDEN
+                )
 
         response = await call_next(request)
         return response
@@ -73,7 +79,9 @@ class IPRestrictionMiddleware(BaseHTTPMiddleware):
 
 # Add the middleware to the app
 app.add_middleware(
-    IPRestrictionMiddleware, allowed_ips=allowed_IPs, allowed_ports=allowed_ports
+    IPRestrictionMiddleware,
+    allowed_ips=allowed_IPs,
+    allowed_ports=allowed_ports,
 )
 app.add_middleware(
     CORSMiddleware,
