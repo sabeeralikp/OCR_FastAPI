@@ -67,7 +67,6 @@ class IPRestrictionMiddleware(BaseHTTPMiddleware):
         remote_ip = request.headers.get("X-Forwarded-For").split(",")[0]
         warnings.warn(remote_ip)
         remote_port = request.url.port
-        warnings.warn(remote_port)
 
         if (
             not remote_ip
