@@ -61,22 +61,19 @@ class IPRestrictionMiddleware(BaseHTTPMiddleware):
         self.allowed_ports = allowed_ports
 
     async def dispatch(self, request, call_next):
-        if request.client:
-            remote_ip = request.client.host
-            remote_port = request.url.port
 
-            if (
-                remote_ip not in self.allowed_ips
-                or remote_port not in self.allowed_ports
-            ):
-                return JSONResponse(
-                    content="Access denied", status_code=HTTP_403_FORBIDDEN
-                )
+        remote_ip = remote_ip = request.headers.get("X-Forwarded-For")
+        remote_port = request.url.port
 
-            response = await call_next(request)
-            return response
-        else:
+        if (
+            not remote_ip
+            or remote_ip not in self.allowed_ips
+            # or remote_port not in self.allowed_ports
+        ):
             return JSONResponse(content="Access denied", status_code=HTTP_403_FORBIDDEN)
+
+        response = await call_next(request)
+        return response
 
 
 # Add the middleware to the app
