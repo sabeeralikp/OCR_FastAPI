@@ -24,7 +24,17 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-app.add_middleware(CORSMiddleware, allow_origins=["*"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://117.193.73.30",
+        "https://117.193.73.30",
+        "https://app.cmo.kerala.gov.in",
+        "http://117.193.73.44",
+        "https://117.193.73.44",
+        "http://192.168.16.54",
+    ],
+)
 
 chroma_utils = ChromaUtils()
 
