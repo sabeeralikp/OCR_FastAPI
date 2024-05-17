@@ -73,8 +73,10 @@ class IPRestrictionMiddleware(BaseHTTPMiddleware):
                     content="Access denied", status_code=HTTP_403_FORBIDDEN
                 )
 
-        response = await call_next(request)
-        return response
+            response = await call_next(request)
+            return response
+        else:
+            return JSONResponse(content="Access denied", status_code=HTTP_403_FORBIDDEN)
 
 
 # Add the middleware to the app
