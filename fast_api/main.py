@@ -63,8 +63,8 @@ class IPRestrictionMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request, call_next):
 
-        remote_ip = remote_ip = request.headers.get("X-Forwarded-For")
-        warnings.warn(type(request.headers.get("X-Forwarded-For")))
+        remote_ip = await request.headers.get("X-Forwarded-For")
+        warnings.warn(remote_ip)
         remote_port = request.url.port
 
         if (
