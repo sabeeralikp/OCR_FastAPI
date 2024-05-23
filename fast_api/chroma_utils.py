@@ -63,7 +63,7 @@ class ChromaUtils:
         )
         self.query_retriver = self.vector_store_index.as_retriever(
             service_context=self.service_context,
-            similarity_top_k=10,
+            similarity_top_k=50,
         )
 
     def vector_search(self, query_str: str):
