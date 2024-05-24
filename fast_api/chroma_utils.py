@@ -46,7 +46,7 @@ class ChromaUtils:
 
         self.keyword_retriver = self.keyword_index.as_retriever(
             service_context=self.service_context,
-            similarity_top_k=20,
+            similarity_top_k=30,
         )
 
     def add_collections(self, doc_data):
@@ -114,6 +114,13 @@ class ChromaUtils:
             .replace("SUBJECT:", "")
             .replace("TO:", "")
             .replace("TO_ADD:", "")
+            .replace("ല്\\u200d", "ൽ")
+            .replace("ള്\\u200d", "ൾ")
+            .replace("ന്\\u200d", "ൻ")
+            .replace("ര്\\u200d", "ർ")
+            .replace("ണ്\\u200d", "ൺ")
+            .replace("\\u200c", "")
+            .replace("\\x0c", " ")
         )
         return output
 
