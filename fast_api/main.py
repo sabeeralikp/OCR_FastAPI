@@ -31,7 +31,6 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-chroma_utils = ChromaUtils()
 
 allowed_IPs = [
     "117.193.73.30",
@@ -101,6 +100,9 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+chroma_utils = ChromaUtils()
 
 
 @app.get("/")
@@ -204,4 +206,5 @@ async def ocr(
 
 @app.get("/search")
 def vector_search(query_str: str):
+    print(query_str)
     return chroma_utils.vector_search(query_str)
