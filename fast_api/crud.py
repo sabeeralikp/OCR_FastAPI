@@ -15,3 +15,6 @@ def create_ocr(db: Session, ocr: schemas.OCRCreate):
     db.commit()
     db.refresh(db_ocr)
     return db_ocr
+
+def get_db_all_ocr(db: Session):
+    return db.query(models.OCR).all()

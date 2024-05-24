@@ -1,7 +1,20 @@
 import chromadb
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.vector_stores.chroma import ChromaVectorStore
-from llama_index.core import Document, StorageContext, ServiceContext, VectorStoreIndex
+from llama_index.core import (
+    Document,
+    StorageContext,
+    ServiceContext,
+    VectorStoreIndex,
+    SimpleKeywordTableIndex,
+)
+from typing import List
+import crud
+from database import SessionLocal
+
+from models import OCR
+
+import json
 
 
 class ChromaUtils:
@@ -26,7 +39,14 @@ class ChromaUtils:
         )
         self.query_retriver = self.vector_store_index.as_retriever(
             service_context=self.service_context,
-            similarity_top_k=50,
+            similarity_top_k=20,
+        )
+
+        self.keyword_index = self.create_keyword_db()
+
+        self.keyword_retriver = self.keyword_index.as_retriever(
+            service_context=self.service_context,
+            similarity_top_k=20,
         )
 
     def add_collections(self, doc_data):
@@ -45,6 +65,7 @@ class ChromaUtils:
                 metadata_template="{key}=>{value}",
                 text_template="Metadata: {metadata_str}\n-----\nContent: {content}",
             )
+            self.keyword_index.insert(document=doc)
             docs.append(doc)
         self.chroma_collection.add(
             documents=[doc.text for doc in docs],
@@ -63,9 +84,67 @@ class ChromaUtils:
         )
         self.query_retriver = self.vector_store_index.as_retriever(
             service_context=self.service_context,
-            similarity_top_k=50,
+            similarity_top_k=20,
         )
 
     def vector_search(self, query_str: str):
-        retrived_results = self.query_retriver.retrieve(query_str)
+        retrived_results = self.keyword_retriver.retrieve(query_str)
+        retrived_results.extend(self.query_retriver.retrieve(query_str))
         return [rresult.node.metadata for rresult in retrived_results]
+
+    def clean_ocr_text(self, ocr_text):
+        output = (
+            ocr_text.replace("\\n", " ")
+            .lstrip("{")
+            .replace("'", "")
+            .rstrip("}")
+            .replace("\x0c", " ")
+            .replace("{", " ")
+            .replace("}", " ")
+            .replace("set()", " ")
+            .replace(",", "")
+            .replace("DATE: ", "")
+            .replace("DOC_ID:", "")
+            .replace("FROM:", "")
+            .replace("FROM_ADD:", "")
+            .replace("INDICATION:", "")
+            .replace("PERSONAL_NAME:", "")
+            .replace("PHONE:", "")
+            .replace("PLACE:", "")
+            .replace("SUBJECT:", "")
+            .replace("TO:", "")
+            .replace("TO_ADD:", "")
+        )
+        return output
+
+    def create_keyword_db(self):
+        db = SessionLocal()
+        ocr_list = crud.get_db_all_ocr(db=db)
+        docs = []
+        for ocr in ocr_list:
+            docs.append(
+                Document(
+                    text=self.clean_ocr_text(ocr.entities),
+                    metadata={
+                        "filename": ocr.filename,
+                        "docetID": ocr.docetID,
+                        "page_number": 0,
+                    },
+                    excluded_llm_metadata_keys=["filename"],
+                    metadata_seperator="::",
+                    metadata_template="{key}=>{value}",
+                    text_template="Metadata: {metadata_str}\n-----\nContent: {content}",
+                )
+            )
+
+        keyword_index = SimpleKeywordTableIndex.from_documents(
+            docs,
+            storage_context=self.storage_context,
+            service_context=self.service_context,
+            show_progress=True,
+            workers=16,
+        )
+
+        db.close()
+
+        return keyword_index
