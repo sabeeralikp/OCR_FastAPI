@@ -93,7 +93,7 @@ class ChromaUtils:
             [
                 r.node.metadata["docetID"]
                 for r in self.keyword_retriver.retrieve(query_str)
-                if r not in retrived_results
+                if r.node.metadata["docetID"] not in retrived_results
             ]
         )
         retrived_results.extend(
@@ -107,7 +107,7 @@ class ChromaUtils:
             [
                 r.node.metadata["docetID"]
                 for r in self.query_retriver.retrieve(query_str)
-                if r not in retrived_results
+                if r.node.metadata["docetID"] not in retrived_results
             ]
         )
 
