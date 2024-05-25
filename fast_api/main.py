@@ -15,7 +15,7 @@ import models
 from database import engine, SessionLocal
 from jsonpickle import encode
 from sqlalchemy.orm import Session
-import crud, models
+import crud, models, schemas
 
 from chroma_utils import ChromaUtils
 
@@ -205,9 +205,9 @@ async def ocr(
     }
 
 
-@app.get("/search")
+@app.post("/search")
 def vector_search(
-    query_str: str,
+    query: schemas.SearchBase,
     db: Session = Depends(get_db),
 ):
-    return chroma_utils.vector_search(query_str, db)
+    return chroma_utils.vector_search(query.query, db)

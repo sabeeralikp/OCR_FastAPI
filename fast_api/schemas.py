@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 
 
+class SearchBase(BaseModel):
+    query: str
+
+
 class OCRBase(BaseModel):
     filename: str
     docetID: str
