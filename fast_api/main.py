@@ -205,6 +205,8 @@ async def ocr(
 
 
 @app.get("/search")
-def vector_search(query_str: str):
-    print(query_str)
-    return chroma_utils.vector_search(query_str)
+def vector_search(
+    query_str: str,
+    db: Session = Depends(get_db),
+):
+    return chroma_utils.vector_search(query_str, db)

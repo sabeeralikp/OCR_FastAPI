@@ -87,10 +87,31 @@ class ChromaUtils:
             similarity_top_k=20,
         )
 
-    def vector_search(self, query_str: str):
-        retrived_results = self.keyword_retriver.retrieve(query_str)
-        retrived_results.extend(self.query_retriver.retrieve(query_str))
-        return [rresult.node.metadata for rresult in retrived_results]
+    def vector_search(self, query_str: str, db):
+        retrived_results = crud.get_string_matches(db=db, search_text=query_str)
+        retrived_results.extend(
+            [
+                r.node.metadata["docetID"]
+                for r in self.keyword_retriver.retrieve(query_str)
+                if r not in retrived_results
+            ]
+        )
+        retrived_results.extend(
+            [
+                r
+                for r in crud.get_substring_matches(db=db, search_text=query_str)
+                if r not in retrived_results
+            ]
+        )
+        retrived_results.extend(
+            [
+                r.node.metadata["docetID"]
+                for r in self.query_retriver.retrieve(query_str)
+                if r not in retrived_results
+            ]
+        )
+
+        return retrived_results
 
     def clean_ocr_text(self, ocr_text):
         output = (
