@@ -1,3 +1,4 @@
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 import models, schemas
 
@@ -25,9 +26,11 @@ def get_string_matches(db: Session, search_text: str):
     output_list = (
         db.query(models.OCR)
         .filter(
-            models.OCR.surya_text.like(f"%{search_text}%"),
-            models.OCR.yolo_text.like(f"%{search_text}%"),
-            models.OCR.entities.like(f"%{search_text}%"),
+            or_(
+                models.OCR.surya_text.contains(search_text),
+                models.OCR.yolo_text.contains(search_text),
+                models.OCR.entities.contains(search_text),
+            )
         )
         .all()
     )
@@ -44,9 +47,11 @@ def get_substring_matches(db: Session, search_text: str):
             output_list.extend(
                 db.query(models.OCR)
                 .filter(
-                    models.OCR.surya_text.like(f"%{key}%"),
-                    models.OCR.yolo_text.like(f"%{key}%"),
-                    models.OCR.entities.like(f"%{key}%"),
+                    or_(
+                        models.OCR.surya_text.contains(key),
+                        models.OCR.yolo_text.contains(key),
+                        models.OCR.entities.contains(key),
+                    )
                 )
                 .all()
             )
