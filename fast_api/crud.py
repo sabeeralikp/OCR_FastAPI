@@ -22,6 +22,19 @@ def get_db_all_ocr(db: Session):
     return db.query(models.OCR).all()
 
 
+def clean_text(string):
+    string = (
+        string.replace("ല്\u200d", "ൽ")
+        .replace("ള്\u200d", "ൾ")
+        .replace("ന്\u200d", "ൻ")
+        .replace("ര്\u200d", "ർ")
+        .replace("ണ്\u200d", "ൺ")
+        .replace("\u200c", "")
+        .replace("\x0c", " ")
+    )
+    return string
+
+
 def get_string_matches(db: Session, search_text: str):
     output_list = (
         db.query(models.OCR)
@@ -34,8 +47,23 @@ def get_string_matches(db: Session, search_text: str):
         )
         .all()
     )
+    output_string = ""
+    for output in output_list:
+        for source in [output.yolo_text, output.surya_text]:
+            search_index_start = str(source).find(search_text)
+            output_string += (
+                str(source)[:search_index_start].split("\n")[-1]
+                + str(source)[search_index_start:].split("\n")[0]
+            )
 
-    return [ocr.docetID for ocr in output_list]
+    return [
+        {
+            "DocketID": ocr.docetID,
+            "NodeType": "ExactStringMatch",
+            "Text": clean_text(output_string),
+        }
+        for ocr in output_list
+    ]
 
 
 def get_substring_matches(db: Session, search_text: str):
@@ -55,4 +83,19 @@ def get_substring_matches(db: Session, search_text: str):
                 )
                 .all()
             )
-    return [ocr.docetID for ocr in output_list]
+    output_string = ""
+    for output in output_list:
+        for source in [output.yolo_text, output.surya_text]:
+            search_index_start = str(source).find(search_text)
+            output_string += (
+                str(source)[:search_index_start].split("\n")[-1]
+                + str(source)[search_index_start:].split("\n")[0]
+            )
+    return [
+        {
+            "DocketID": ocr.docetID,
+            "NodeType": "ExactSubStringMatch",
+            "Text": clean_text(output_string),
+        }
+        for ocr in output_list
+    ]

@@ -91,23 +91,34 @@ class ChromaUtils:
         retrived_results = crud.get_string_matches(db=db, search_text=query_str)
         retrived_results.extend(
             [
-                r.node.metadata["docetID"]
+                {
+                    "DocketID": r.node.metadata["docetID"],
+                    "NodeType": "KeyWordVectorMatch",
+                    "Text": r.node.text,
+                }
                 for r in self.keyword_retriver.retrieve(query_str)
-                if r.node.metadata["docetID"] not in retrived_results
+                if r.node.metadata["docetID"]
+                not in [r["DocketID"] for r in retrived_results]
             ]
         )
         retrived_results.extend(
             [
                 r
                 for r in crud.get_substring_matches(db=db, search_text=query_str)
-                if r not in retrived_results
+                if r["DocketID"] not in [r["DocketID"] for r in retrived_results]
             ]
         )
         retrived_results.extend(
             [
-                r.node.metadata["docetID"]
+                {
+                    "DocketID": r.node.metadata["docetID"],
+                    "NodeType": "ContextVectorMatch",
+                    # "Text": crud.clean_text(r.node.text),
+                    "Text": "",
+                }
                 for r in self.query_retriver.retrieve(query_str)
-                if r.node.metadata["docetID"] not in retrived_results
+                if r.node.metadata["docetID"]
+                not in [r["DocketID"] for r in retrived_results]
             ]
         )
 
